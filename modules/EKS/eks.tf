@@ -46,11 +46,6 @@ resource "aws_eks_cluster" "eks-cluster" {
 
   }
 
-#  access_config {  # https://docs.aws.amazon.com/eks/latest/userguide/access-entries.html
-#    authentication_mode                         = "CONFIG_MAP"
-#    bootstrap_cluster_creator_admin_permissions = true
-#  }
-
   depends_on = [
     aws_iam_role_policy_attachment.eks-cluster-role,
     aws_cloudwatch_log_group.eks-cluster
@@ -63,33 +58,6 @@ resource "aws_cloudwatch_log_group" "eks-cluster" {
   name              = "/aws/eks/${var.cluster_name}/cluster"
   retention_in_days = 3
 }
-#data "aws_iam_policy_document" "cw_logging_policy" {
-#  statement {
-#    actions = [
-#      "logs:CreateLogGroup",
-#      "logs:CreateLogStream",
-#      "logs:PutLogEvents",
-#      "logs:DescribeLogStreams",
-#    ]
-#    effect    = "Allow"
-#    resources = ["*"]
-#  }
-#}
-#
-#resource "aws_iam_policy" "cw_logging_policy" {
-#  count  = var.cw_logs ? 1 : 0
-#  name   = "${local.cluster_name}-cw-logging-policy"
-#  policy = data.aws_iam_policy_document.cw_logging_policy.json
-#  tags   = local.default_tags
-#}
-#
-#resource "aws_iam_role_policy_attachment" "fargate_cw_logging_policy" {
-#  count      = var.cw_logs ? 1 : 0
-#  role       = aws_iam_role.fargate_pod_execution_role.name
-#  policy_arn = aws_iam_policy.cw_logging_policy[0].arn
-#}
-
-
 
 # addons  https://docs.aws.amazon.com/eks/latest/userguide/eks-add-ons.html
 
@@ -226,34 +194,3 @@ resource "aws_iam_role_policy_attachment" "fargate-pod-execution-role" {
   role       = aws_iam_role.fargate-pod-execution-role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy"
 }
-
-
-
-
-############## Node Group
-
-
-#resource "aws_eks_node_group" "example" {
-#  cluster_name    = aws_eks_cluster.eks-cluster.name
-#  node_group_name = "eks-node-group"
-#  node_role_arn   = aws_iam_role.example.arn
-#  subnet_ids      =aws_subnet.private_subnet[*].id
-#
-#  scaling_config {
-#    desired_size = 1
-#    max_size     = 2
-#    min_size     = 1
-#  }
-#
-#  update_config {
-#    max_unavailable = 1
-#  }
-#
-#  # Ensure that IAM Role permissions are created before and deleted after EKS Node Group handling.
-#  # Otherwise, EKS will not be able to properly delete EC2 Instances and Elastic Network Interfaces.
-#  depends_on = [
-#    aws_iam_role_policy_attachment.example-AmazonEKSWorkerNodePolicy,
-#    aws_iam_role_policy_attachment.example-AmazonEKS_CNI_Policy,
-#    aws_iam_role_policy_attachment.example-AmazonEC2ContainerRegistryReadOnly,
-#  ]
-#}
